@@ -103,51 +103,93 @@ let create_banner = (for_container) => {
   
     let banner = {};
 
-    let create_elements = (() => {
-      banner.viewport = document.createElement('div');
-      banner.overlay = document.createElement('div');
-      banner.code_pre = document.createElement('pre');
+    let create_elements = () => {
+      let $new = e => document.createElement(e);
+      banner.viewport = $new('div');
+      banner.overlay = $new('div');
+      banner.code_pre = $new('pre');
+      banner.username_anchor = $new('a');
+      banner.code_file_name_anchor = $new('a');
 
       banner.code_pre.set_y = px => (banner.code_pre.style.top = `${px}px`);
       banner.viewport.get_scroll_bounds_y = () => -1 * banner.code_pre.getBoundingClientRect().height + banner.viewport.getBoundingClientRect().height;
       window.addEventListener('resize', () => banner.is_done_scrolling && banner.code_pre.set_y(banner.viewport.get_scroll_bounds_y()));
-    })();
+    };
 
-    let style_elements = (() => {
+    let style_elements = () => {
       for_container.style.position = 'relative';
       banner.overlay.style.position = banner.viewport.style.position = 'absolute';
       banner.overlay.style.top = banner.viewport.style.top = '0px';
       banner.overlay.style.bottom = banner.viewport.style.bottom = '0px';
       banner.overlay.style.left = banner.viewport.style.left = '0px';
       banner.overlay.style.right = banner.viewport.style.right = '0px';
+      banner.overlay.style.pointerEvents = 'none'; // Allow for interaction of elements under overlay
+      banner.overlay.style.background = 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(61, 61, 61, 0.2) 10%, rgba(187, 187, 187, 0.15) 50%, rgba(61, 61, 61, 0.2) 90%, rgba(0, 0, 0, 0.5) 100%)';
+
       banner.viewport.style.overflow = 'hidden';
       banner.viewport.style.backgroundColor = '#272822';
 
-      banner.overlay.style.background = 'linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(61, 61, 61, 0.2) 10%, rgba(187, 187, 187, 0.15) 50%, rgba(61, 61, 61, 0.2) 90%, rgba(0, 0, 0, 0.5) 100%)';
+      banner.code_pre.className = 'code_pre';
       banner.code_pre.style.margin = '0px';
       banner.code_pre.style.transformOrigin = 'top left';
-      banner.code_pre.style.transform = 'scale(.65)';
+      banner.code_pre.style.transform = 'translateZ(0)';
       banner.code_pre.style.width = '200%';
       banner.code_pre.style.position = 'absolute';
       banner.code_pre.style.overflow = 'hidden';
-    })();
 
-    let append_elements = (() => {
+      banner.username_anchor.className = 'username_anchor'; // Allows for overrides
+      banner.username_anchor.style.position = 'absolute';
+      banner.username_anchor.style.right = '5px';
+      banner.username_anchor.style.top = '5px';
+      banner.username_anchor.style.color = '#FFF';
+      banner.username_anchor.style.backgroundColor = '#000A';
+      banner.username_anchor.style.padding = '2px';
+      banner.username_anchor.style.borderRadius = '3px';
+
+      banner.code_file_name_anchor.className = 'code_file_name_anchor'; // Allows for overrides
+      banner.code_file_name_anchor.style.position = 'absolute';
+      banner.code_file_name_anchor.style.right = '5px';
+      banner.code_file_name_anchor.style.bottom = '5px';
+      banner.code_file_name_anchor.style.color = '#FFF';
+      banner.code_file_name_anchor.style.backgroundColor = '#000A';
+      banner.code_file_name_anchor.style.padding = '2px';
+      banner.code_file_name_anchor.style.borderRadius = '3px';
+    };
+
+    let append_elements = () => {
       banner.viewport.appendChild(banner.code_pre);
+      banner.viewport.appendChild(banner.username_anchor);
+      banner.viewport.appendChild(banner.code_file_name_anchor);
       for_container.appendChild(banner.viewport);
       for_container.appendChild(banner.overlay);
-    })();
+    };
+
+    create_elements();
+    style_elements();
+    append_elements();
 
     banner.start_fetching_code = () => {
       start_fetching_code(username, repository, banner.start_scrolling);
+    };
+
+    banner.set_info = (username, code, code_file_name, repo_name, code_file_blob_url) => {
+      banner.username_anchor.textContent = `@${username}`;
+      banner.username_anchor.href = `https://github.com/${username}`;
+
+      banner.code_file_name_anchor.textContent = `${repo_name} - ${code_file_name}`;
+      banner.code_file_name_anchor.href = code_file_blob_url;
+
+      banner.code_pre.textContent = code;
+      hljs.highlightBlock(banner.code_pre);
     };
 
     banner.scroll_interval;
     banner.is_done_scrolling;
     banner.start_scrolling = (username, code, code_file_name, repo_name, code_file_blob_url) => {
       console.log(`Banner is displaying ${code_file_name} from ${repo_name} at ${code_file_blob_url} by ${username}`);
-      banner.code_pre.textContent = code;
-      hljs.highlightBlock(banner.code_pre);
+      
+      banner.set_info(username, code, code_file_name, repo_name, code_file_blob_url);
+
       banner.is_done_scrolling = false;
       banner.scroll_interval && clearInterval(banner.scroll_interval);
 

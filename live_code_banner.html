@@ -1,23 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inconsolata&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.1/build/styles/monokai.min.css">
   <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.1.1/build/highlight.min.js"></script>
   <script type="text/javascript" src="live_code_banner.js"></script>
 
   <style type="text/css">
+    body {
+      margin: 0px;
+    }
+    #info_div {
+      margin: 8px;
+      font-family: 'Inconsolata', monospace;
+    }
     #first_live_code {
       left: 0px;
       height: 182px;
       right: 0px;
-      border-radius: 10px;
       overflow: hidden;
-      margin: 0px;
-      padding: 0px;
+      box-shadow: 0px 5px 5px 0px rgba(0,0,0,0.75);
+      font-family: 'Inconsolata', monospace;
+    }
+    .username_anchor {
+      font-family: 'Inconsolata', monospace;
+      font-size: 14px;
+    }
+    .code_file_name_anchor {
+      font-family: 'Inconsolata', monospace;
+      font-size: 11px;
+    }
+    .code_pre {
+      font-family: 'Inconsolata', monospace;
+      font-size: 10px;
     }
   </style>
 </head>
 <body>
   <div id="first_live_code" class="live_code_banner_container" for-username="TheAlgorithms" for-repository="Java"></div>
+  <div id="info_div">
+    Hello world! This page houses a working example of a banner that displays code from a given user's GitHub.
+  </div>
 </body>
 </html>
