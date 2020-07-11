@@ -33,23 +33,28 @@ let start_fetching_code = async (username, repository, on_code_loaded) => {
 
       let random_code_file_path = get_random_value(current_repository_code_file_paths);
 
-      let code_file_url = `https://raw.githubusercontent.com/${username}/${current_repository_name}/${current_repository_latest_commit_sha}/${random_code_file_path}`;
+      let code_file_name = random_code_file_path.substring(random_code_file_path.lastIndexOf('/') + 1);
 
-      console.log(`Fetching ${code_file_url}..`);
+      let code_file_raw_url = `https://raw.githubusercontent.com/${username}/${current_repository_name}/${current_repository_latest_commit_sha}/${random_code_file_path}`;
 
-      let code = await fetch_code(code_file_url);
+      let code_file_blob_url = `https://github.com/${username}/${current_repository_name}/blob/${current_repository_latest_commit_sha}/${random_code_file_path}`;
+
+      console.log(`Fetching ${code_file_raw_url}..`);
+
+      let code = await fetch_code(code_file_raw_url);
 
       current_repository_code_file_paths.splice(current_repository_code_file_paths.indexOf(random_code_file_path), 1); // Remove from array so it isn't chosen again
 
       // Here: remove the value from code_files, and it and code to a separate []/map ~ cached_code_files
       // This will prevent showing duplicates until there are no files remaining, then cached_code_files can be used
 
-      on_code_loaded(code);
+      // Would be cool to supply what the repo / file is and URL to display anchor in banner
+      on_code_loaded(username, code, code_file_name, current_repository_name, code_file_blob_url);
 
       let get_random_duration_between = (start_range, end_range) => Math.floor(Math.random() * (end_range - start_range + 1) + start_range);
 
       let random_duration = get_random_duration_between(7500, 25000);
-      console.log(`Scrolling for ${random_duration}ms`);
+
       setTimeout(load_random_code, random_duration);
 
     }
@@ -60,7 +65,7 @@ let start_fetching_code = async (username, repository, on_code_loaded) => {
       console.log(`There are ${all_repository_names.length} repositories remaining`);
 
       console.log('Fetching latest commit SHA..');
-      current_repository_latest_commit_sha = await fetch_latest_commit_sha(username, current_repository_name); // Doing this makes loading code files cheaper by using raw.github instead of api.github
+      current_repository_latest_commit_sha = await fetch_latest_commit_sha(username, current_repository_name);
       console.log(`Fetched ${current_repository_latest_commit_sha}.`);
 
       console.log('Fetching code file paths..');
@@ -139,7 +144,8 @@ let create_banner = (for_container) => {
 
     banner.scroll_interval;
     banner.is_done_scrolling;
-    banner.start_scrolling = (code) => {
+    banner.start_scrolling = (username, code, code_file_name, repo_name, code_file_blob_url) => {
+      console.log(`Banner is displaying ${code_file_name} from ${repo_name} at ${code_file_blob_url} by ${username}`);
       banner.code_pre.textContent = code;
       hljs.highlightBlock(banner.code_pre);
       banner.is_done_scrolling = false;
